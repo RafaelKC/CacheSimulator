@@ -7,6 +7,6 @@ var isNumber = Int32.TryParse(input, out var number);
 
 if (isNumber)
 {
-    var cache = new Cache(CacheType.Direct, number);
+    var cache = new DirectCache(number);
     Console.WriteLine(cache);
 }
