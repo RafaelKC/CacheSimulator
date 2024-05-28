@@ -13,36 +13,48 @@ public class DirectCache(long length): Cache
     {
         var cacheAddress = memoryAdrress % Length;
         var isOnCache = MemoryMap.TryGetValue(cacheAddress, out var addressOnCache);
-        if (isOnCache && addressOnCache.Item2 == memoryAdrress)
-        {
-            TotalHits += 1;
-            AddHistory(OperationsType.Read, memoryAdrress);
-            return true;
-        }
-
-        var needToSaveOldValueOnMemory = isOnCache && addressOnCache.Item1;
-        AddHistory(OperationsType.Read, memoryAdrress, false, needToSaveOldValueOnMemory ? addressOnCache.Item2 : null);
-        TotalMisses += 1;
-        MemoryMap.Add(cacheAddress, (false, memoryAdrress));
-        return false;
-
-    }
-    
-    public override bool SaveAddress(long memoryAdrress)
-    {
-        var cacheAddress = memoryAdrress % Length;
-        var isOnCache = MemoryMap.TryGetValue(cacheAddress, out var addressOnCache);
-
-        MemoryMap.Add(cacheAddress, (true, memoryAdrress));
-
         var wasHit = isOnCache && addressOnCache.Item2 == memoryAdrress;
-        var needToSaveOldValueOnMemory = isOnCache && !wasHit && addressOnCache.Item1;
 
-        AddHistory(OperationsType.Write, memoryAdrress, wasHit, needToSaveOldValueOnMemory ? addressOnCache.Item2 : null);
+        if (wasHit)
+        {
+            TotalHits++;
+            AddHistory(OperationsType.Read, memoryAdrress);
+        }
+        else
+        {
+            TotalMisses++;
+            AddHistory(OperationsType.Read, memoryAdrress, false, isOnCache && addressOnCache.Item1 ? addressOnCache.Item2 : null);
+            MemoryMap[cacheAddress] = (false, memoryAdrress);
+        }
 
         return wasHit;
     }
 
+    public override bool SaveAddress(long memoryAdrress)
+    {
+        var cacheAddress = memoryAdrress % Length;
+        var isOnCache = MemoryMap.TryGetValue(cacheAddress, out var addressOnCache);
+        var wasHit = isOnCache && addressOnCache.Item2 == memoryAdrress;
+
+        if (wasHit)
+        {
+            TotalHits++;
+        }
+        else
+        {
+            TotalMisses++;
+            AddHistory(OperationsType.Write, memoryAdrress, false, isOnCache && addressOnCache.Item1 ? addressOnCache.Item2 : null);
+        }
+
+        MemoryMap[cacheAddress] = (true, memoryAdrress);
+        return wasHit;
+    }
+
+    
+    public Dictionary<long, (bool, long)> GetMemoryMap()
+    {
+        return MemoryMap;
+    }
     public override string ToString()
     {
         return Length.ToString();

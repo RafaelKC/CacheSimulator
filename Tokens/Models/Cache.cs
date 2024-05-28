@@ -21,5 +21,14 @@ public abstract class Cache
         throw new Exception("Not use Cache class");
     }
 
+    public int GetTotalHits()
+    {
+        return TotalHits;
+    }
+
+    public int GetTotalMisses()
+    {
+        return TotalMisses;
+    }
     protected abstract void AddHistory(OperationsType op, long principalMemoryAddress, bool wasHit = true, long? saveOnAddress = null);
 }
