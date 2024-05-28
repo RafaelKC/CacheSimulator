@@ -18,12 +18,10 @@ public class DirectCache(long length): Cache
         if (wasHit)
         {
             TotalHits++;
-            AddHistory(OperationsType.Read, memoryAdrress);
         }
         else
         {
             TotalMisses++;
-            AddHistory(OperationsType.Read, memoryAdrress, false, isOnCache && addressOnCache.Item1 ? addressOnCache.Item2 : null);
             MemoryMap[cacheAddress] = (false, memoryAdrress);
         }
 
@@ -36,33 +34,14 @@ public class DirectCache(long length): Cache
         var isOnCache = MemoryMap.TryGetValue(cacheAddress, out var addressOnCache);
         var wasHit = isOnCache && addressOnCache.Item2 == memoryAdrress;
 
-        if (wasHit)
-        {
-            TotalHits++;
-        }
-        else
-        {
-            TotalMisses++;
-            AddHistory(OperationsType.Write, memoryAdrress, false, isOnCache && addressOnCache.Item1 ? addressOnCache.Item2 : null);
-        }
+        TotalHits++;
 
         MemoryMap[cacheAddress] = (true, memoryAdrress);
         return wasHit;
     }
 
-    
-    public Dictionary<long, (bool, long)> GetMemoryMap()
-    {
-        return MemoryMap;
-    }
     public override string ToString()
     {
         return Length.ToString();
-    }
-
-    protected override void AddHistory(OperationsType op, long principalMemoryAddress, bool wasHit = true, long? saveOnAddress = null)
-    {
-        var nextIndex = History.Count;
-        History.Add(new OperationHistory(nextIndex, op, wasHit, principalMemoryAddress, saveOnAddress));
     }
 }

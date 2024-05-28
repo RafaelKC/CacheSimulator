@@ -7,27 +7,31 @@ namespace CacheSimulator
 {
     class Program
     {
+        private static long TamanhoCache { get; set; }
+        private static long TotalBlocos { get; set; } = 2;
+        private static long TamanhoBlocos { get; set; }
+
         static void Main(string[] args)
         {
             Console.WriteLine("Digite o tamanho da cache:");
-            long tamanhoCache = long.Parse(Console.ReadLine());
+            TamanhoCache = long.Parse(Console.ReadLine());
+            TamanhoBlocos = TamanhoCache / TotalBlocos;
 
-            DirectCache cache = new DirectCache(tamanhoCache);
+            Cache cache = new AssociativeCache(TamanhoCache, TotalBlocos);
 
 
-            List<long> posicoesDeMemoria = new List<long> { 0, 1, 2 ,3 ,1, 4, 5, 6 };
+            List<long> posicoesDeMemoria = new List<long> { 33, 3, 11, 10, 5, 11, 9, 9, 12, 6 };
 
             int totalAcessos = 0;
 
             foreach (var posicao in posicoesDeMemoria)
             {
-                totalAcessos++;
+                var foiHit = cache.LoadAddress(posicao);
 
-                bool foiHit = cache.SaveAddress(posicao);
-                long posicaoCache = posicao % tamanhoCache;
-               
+               if (!foiHit)  totalAcessos++;
+
                 Console.WriteLine($"Endereço de Memória: {posicao}, {(foiHit ? "Hit" : "Miss")}");
-                PrintCache(cache, tamanhoCache);
+                PrintCache(cache, TamanhoCache);
                 Console.WriteLine();
             }
 
@@ -35,14 +39,20 @@ namespace CacheSimulator
             PrintResults(cache, totalAcessos);
         }
 
-        static void PrintCache(DirectCache cache, long cacheSize)
+        static void PrintCache(Cache cache, long cacheSize)
         {
 
             Console.WriteLine("\nConteúdo da Cache:");
             Console.WriteLine("Posição da Cache | Posição de Memória");
             for (long i = 0; i < cacheSize; i++)
             {
-                
+                var newBloco = i % TamanhoBlocos;
+
+                if (newBloco == 0)
+                {
+                    Console.WriteLine($"-------------------------------------------------");
+                }
+
                 if (cache.GetMemoryMap().TryGetValue(i, out var value))
                 {
                     Console.WriteLine($"        {i}        |        {value.Item2}        ");
@@ -53,7 +63,8 @@ namespace CacheSimulator
                 }
             }
         }
-        static void PrintResults(DirectCache cache, int totalAcessos)
+
+        static void PrintResults(Cache cache, int totalAcessos)
         {
             int totalHits = cache.GetTotalHits();
             int totalMisses = cache.GetTotalMisses();

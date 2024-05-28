@@ -30,5 +30,9 @@ public abstract class Cache
     {
         return TotalMisses;
     }
-    protected abstract void AddHistory(OperationsType op, long principalMemoryAddress, bool wasHit = true, long? saveOnAddress = null);
+
+    public Dictionary<long, (bool, long)> GetMemoryMap()
+    {
+        return MemoryMap;
+    }
 }
