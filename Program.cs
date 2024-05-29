@@ -17,10 +17,11 @@ namespace CacheSimulator
             TamanhoCache = long.Parse(Console.ReadLine());
             TamanhoBlocos = TamanhoCache / TotalBlocos;
 
-            Cache cache = new AssociativeCache(TamanhoCache, TotalBlocos);
+            //Cache cache = new AssociativeCache(TamanhoCache, TotalBlocos);
+            Cache cache = new DirectCache(TamanhoCache);
 
 
-            List<long> posicoesDeMemoria = new List<long> { 33, 3, 11, 10, 5, 11, 9, 9, 12, 6 };
+            List<long> posicoesDeMemoria = new List<long> { 33, 3, 11, 5, 11, 9, 9, 12, 6 };
 
             int totalAcessos = 0;
 
@@ -48,7 +49,7 @@ namespace CacheSimulator
             {
                 var newBloco = i % TamanhoBlocos;
 
-                if (newBloco == 0)
+                if (i > 0 && newBloco == 0 && cache.Type == CacheType.Associative)
                 {
                     Console.WriteLine($"-------------------------------------------------");
                 }
